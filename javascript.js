@@ -2,21 +2,14 @@ var ctx = document.getElementById('myChart').getContext('2d');
 var myChart = new Chart(ctx, {
     type: 'bar',
     data: {
-        labels: ['2015', '2016', '2017', '2018', '2019', '2020'],
+        labels: ['America', 'East Asia and Pacific', 'Europe and Central Asia', 'Middle East and North Africa', 'South Asia', 'Sub-Saharan Africa'],
         datasets: [{
-            label: '# of Apples',
-            data: [12, 19, 3, 5, 2, 3],
+            label: 'Region',
+            data: [18791.13,14480.30,20818.45,13856,2505.17,2569],
             backgroundColor: [
                 '#ff0800'
             ]
         },
-        {
-            label: '# of Oranges',
-            data: [22, 10, 23, 6, 22, 13],
-            backgroundColor: [
-                '#FFA500'
-            ],
-        }
     ]
     },
     options: {
@@ -24,14 +17,14 @@ var myChart = new Chart(ctx, {
         plugins: {
             title: {
                 display: true,
-                text: 'Apples and Oranges by year',
+                text: 'GDP per capita by region',
                 font: {
                     size: 18
                 }
             },
             subtitle: {
                 display: true,
-                text: 'For all but one year, oranges outnumbered apples'
+                text: 'Europe and Central Asia has highest GDP per capita with America coming close at an approximate $2,000 difference '
             }
         },
         scales: {
