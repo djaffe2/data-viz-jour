@@ -1,0 +1,119 @@
+---
+title: "ggplot-lab"
+output: html_document
+date: "2025-04-25"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+habits_study <- read.csv(file.choose())
+file_path <- file.choose()
+cat(file_path)
+```
+
+```{r}
+habits_study <- read.csv ("/Users/dylanjaffe/Documents/GitHub/data-viz-jour/student_habits_performance.csv")
+part_time_job<- read.csv ("/Users/dylanjaffe/Documents/GitHub/data-viz-jour/ptj_pivot.csv")
+```
+
+
+
+```{r}
+library(dbplyr)
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+library(janitor)
+library(scales)
+library(readr)
+```
+
+```{r}
+part_time_job <- part_time_job |>
+  rename(
+    study_hours_pd = `study_hours`
+  )
+```
+
+```{r}
+part_time_job<- part_time_job|>
+ mutate(
+    exam_grade_percentage = `exam_score` / sum(`exam_score`) * 100) 
+part_time_job<- part_time_job|>
+ mutate(
+    study_hours_pd_percentage = `study_hours_pd` / sum(`study_hours_pd`) * 100) 
+
+```
+
+```{r}
+# Reshaped to long format
+ptj_long <- part_time_job|>
+  select(part_time_job, 
+         exam_grade_percentage, 
+         study_hours_pd_percentage) |>
+  pivot_longer(
+    cols = c(exam_grade_percentage, study_hours_pd_percentage),
+    names_to = "metric",
+    values_to = "percentage"
+  )
+
+# clean up axis names for display
+ptj_long$metric <- recode(ptj_long$metric,
+                          exam_grade_percentage = "Exam Score %",
+                          study_hours_pd_percentage = "Study Hours %")
+
+ggplot(ptj_long, aes(x = metric, y = percentage, fill = part_time_job)) +
+  geom_col(position = position_dodge(width = 0.8), width = 0.7) +
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) +
+  labs(
+    title = "Percentage of Exam Scores and Study Hours by Part-Time Job Status",
+    subtitle = "Students with a part-time job are less likely to have time to study for their exams", caption= "Source:Kaggle\nby Dylan Jaffe",
+    x = "",
+    y = "Percentage",
+    fill = "Part-Time Job"
+  ) +
+  theme_minimal()
+```
+```{r}
+habits_study
+
+habits_filtered <- habits_study |>
+  filter(gender %in% c("Female", "Male"))
+
+avg_score_by_study_gender <- habits_filtered |>
+  group_by(study_hours_per_day, gender) |>
+  summarise(mean_exam_score = mean(exam_score, na.rm = TRUE))
+
+
+ggplot(avg_score_by_study_gender, aes(x = study_hours_per_day, y = mean_exam_score, color = gender)) +
+  geom_line(size = .8) +
+  geom_point(size = 2) +
+  scale_color_manual(values = c("Female" = "#719252", "Male" = "#6ac5fe"))+
+  labs(
+    title = "More sleep correlates to higher exam scores, Kaggle data shows",
+    subtitle = "While Women deviate further from the average when getting little sleep, both men and women\n can benefit from getting more sleep to preform better on their exams", width=100,
+    caption = "Source: Kaggle\nby Dylan Jaffe",
+    x = "Study Hours Per Day",
+    y = "Average Exam Score",
+    color = "Gender"
+  ) 
+```
+
+```{r}
+habits_filtered
+
+ggplot(habits_filtered, aes(x = sleep_hours, y = mental_health_rating, color = gender)) +
+  geom_area(alpha = 0.7, size = .8) +
+  labs(
+    title = "How sleep can affect mental health",
+    subtitle = "According to a dataset by Kaggle, men overall are more likely to report lower mental health scores\nthan women",
+    caption = "Source:Kaggle\nby Dylan Jaffe",
+    x = "Sleep Hours",
+    y = "Mental Health Rating",
+    color = "Gender"
+  ) +
+  theme_minimal()
+```
