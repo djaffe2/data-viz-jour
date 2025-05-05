@@ -1,0 +1,161 @@
+---
+title: "Spotify_songs"
+output: html_document
+date: "2025-04-30"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+install.packages("treemapify")
+library(treemapify)
+library(tidyverse)
+library(tidytext)
+library(ggplot2)
+library(scales)
+library(janitor)
+library(svglite)
+library(grid)
+library(dplyr)
+spotify_songs <- read.csv("~/Downloads/spotify_songs.csv")
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r}
+clean_names(spotify_songs)
+```
+
+```{r}
+  ggplot(spotify_songs, aes(danceability, valence, color=playlist_genre)) +
+  geom_smooth(method = "lm", se = TRUE, color = "gray") +
+   geom_point(color = "white") +  
+  theme_minimal() +
+  theme(
+    plot.background = element_rect(fill = "black", color = NA),
+    panel.background = element_rect(fill = "black", color = NA),
+    panel.grid.major = element_line(color = "gray30"),
+    panel.grid.minor = element_line(color = "gray20"),
+    axis.text = element_text(color = "white"),
+    axis.title = element_text(color = "white"),
+    plot.title = element_text(color = "white"),
+   legend.title=element_text(color="white"),
+   legend.text = element_text(color="white"),
+  plot.subtitle = element_text(color = "white"),
+  plot.caption = element_text(color = "white"),
+  ) +
+   labs(title = "The correlation between valence and danceability in Spotify's most popular songs", subtitle = "Pop, the most visually apparent genre, tends to have a balance between valence and\n danceability, but some songs have low valence and high danceability. On the contrary, Rap\n tends to be more danceable but less upbeat, indicating a lot of rap songs are fun to move to\n but deal with heavier or more serious topics.",
+        caption = "Source: Spotify via Kaggle \n by Dylan Jaffe", x = "Danceability", y = "Valence", color="Playlist Genre")+
+ geom_point()
+```
+
+```{r}
+library(stopwords)
+
+# Step 1: Load stop word lists
+library(tidyverse)
+library(tidytext)
+library(stopwords)
+
+data("stop_words")
+
+# Read curse words from GitHub
+curse_words <- read_lines("https://raw.githubusercontent.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words/master/en") %>%
+  tolower() %>%
+  tibble(word = .) %>%
+  mutate(lexicon = "profanity")
+
+# Spanish stop words
+spanish_stop_words <- tibble(
+  word = stopwords("es"),
+  lexicon = "spanish"
+)
+
+# Custom filler words
+custom_filler_words <- tibble(
+  word = tolower(c("yeah", "uh", "oh", "na", "la", "ooh", "woo", "ha","niggas", "em","til", "doo", "woah", "yo", "whoa", "ah", "si", "hey", "pa", "wanna", "ayy", "da", "gonna", "gon", "gotta", "doo", "yeh", "i'ma", "woah", "til", "sé", "bout", "run", "huh", "eh")),
+  lexicon = "custom"
+)
+
+# Step 2: Combine all stop/filler/profanity words
+all_stop_words <- bind_rows(stop_words, spanish_stop_words, custom_filler_words, curse_words)
+
+# Step 3: Tokenize lyrics into words
+words <- spotify_songs %>%
+  select(lyrics) %>%
+  unnest_tokens(word, lyrics)
+
+# Step 4: Filter out stop words, curse words, and filler words
+words_clean <- words %>%
+  anti_join(all_stop_words, by = "word")
+
+# Step 5: Count word frequency
+word_counts <- words_clean %>%
+  group_by(word) %>%
+  summarise(n = n()) %>%
+  arrange(desc(n))
+
+# View result
+word_counts
+
+
+```
+```{r}
+word_counts <- words_clean %>%
+  count(word, sort = TRUE) %>%
+  filter(n >= 5) %>%
+  slice_max(n, n = 30)  # Top 30 words
+
+ggplot(word_counts, aes(area = n, fill = n, label = word)) +
+  geom_treemap() +
+  geom_treemap_text(
+    colour = "white",     
+    place = "centre",
+    grow = TRUE,
+    reflow = TRUE
+  ) +
+  scale_fill_gradient(low = "#a8e6a1", high = "#004d00",
+                      ) +  
+  theme_minimal(base_family = "Arial") +
+  theme(
+    plot.background = element_rect(fill = "black", color = NA),
+    panel.background = element_rect(fill = "black", color = NA),
+    legend.background = element_rect(fill = "black", color = NA),
+    legend.text = element_text(color = "white"),
+    legend.title = element_text(color = "white"),
+    plot.title = element_text(color = "white", size = 16, face = "bold"),
+    plot.subtitle = element_text(color = "white"),
+    axis.text = element_blank(),
+    axis.title = element_blank(),
+    panel.grid = element_blank(),
+      plot.caption = element_text(color = "white")
+  ) +
+  labs(
+    title = "Most Common Words in Spotify Lyrics",
+    subtitle = "The top 30 most common words found throughout Spotify's most popular songs reveal themes of love, \nmoney and relationships",
+    caption="Source: Kaggle\n by Dylan Jaffe",
+    fill = "Frequency"
+  )
+  
+```
+
+
+```{r}
+spotify_songs|>
+  group_by(artist_name) |>
+  summarise(n = n()) |>
+  arrange(desc(n)) |>
+  slice_max(n, n = 10)
+
+
+```
