@@ -1,0 +1,109 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Spotify Scrollytelling</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main>
+    <section id="intro">
+      <h1 class="intro__hed">Spotify Data from one of the Most Popular Music Streaming Apps</h1>
+                <img src="spotify_logo.svg" alt="Spotify Logo" class="step-logo">
+      <p class="intro__dek">Data ranging from user growth to most popular lyric words, explained in five graphics.</p>
+
+    </section>
+
+    <!-- FLOURISH SCROLLYTELLING -->
+    <section id="scrolly">
+      <article>
+        <div class="step" data-step="1"><p>This slope chart shows Spotify's most popular genres listened to. 
+            </p>
+          <p>-Dancebility measures how suitable a track is for dancing based on tempo and rhythm stability. 
+            </p>
+          <p>
+     -Energy represents the perceived intensity and activity of a song. 
+            </p>
+            <p>
+            -Valence indiciates the musical positivity or negativity of a song.                 
+            </p>
+        <p>
+          -Acousiticness measures how likely a track is to be acoustic rather than electronic instruments.      
+            </p>
+            <p>
+         -Liveness indicates the presense of an audience in a recording, indicating the likelihood of a live performance.
+            </p>
+          </div>
+          
+        <div class="step" data-step="2"><p>Bar chart showing Spotify's most popular artists by how frequent they appeared in the dataset.</p></div>
+      </article>
+
+      <div class="sticky-thing">
+        <div class="chart chart-step-1 visible">
+          <div class="flourish-embed flourish-slope" data-src="visualisation/22923409" style="width: 100%; height: 100%;"></div>
+        </div>
+        <div class="chart chart-step-2 hidden">
+          <div class="flourish-embed flourish-chart" data-src="visualisation/22941418" style="width: 100%; height: 100%;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TEXT AND IMAGE SIDE-BY-SIDE SCROLL -->
+    <section id="scrolly-secondary">
+      <article>
+        <div class="step" data-step="3"><p>This scatterplot shows how valence relates to danceability across genres.</p></div>
+        <div class="step" data-step="4"><p>Treemap showing the most common Spotify lyrics broken down by how frequent they appear in songs according to the dataset.</p></div>
+        <div class="step" data-step="5"><p>This chart shows total Spotify user growth over time. broken down by quarters from Q1 2015 to Q4 2024.</p></div>
+      </article>
+
+      <div class="sticky-thing">
+        <div class="chart chart-step-3 hidden">
+          <img src="spotify_scatterplot.png" alt="Spotify Scatterplot">
+        </div>
+        <div class="chart chart-step-4 hidden">
+          <img src="spotify_treemap.png" alt="Spotify Treemap">
+        </div>
+        <div class="chart chart-step-5 hidden">
+          <img src="Spotify_final.png" alt="Spotify Final Chart">
+        </div>
+      </div>
+    </section>
+
+    <section id="outro"></section>
+  </main>
+
+  <script src="https://public.flourish.studio/resources/embed.js"></script>
+  <script src="https://unpkg.com/intersection-observer@0.5.1/intersection-observer.js"></script>
+  <script src="https://unpkg.com/scrollama"></script>
+    <footer> Scrollytelly created by Dylan Jaffe</footer>
+  <script>
+    const steps = document.querySelectorAll(".step");
+    const scroller = scrollama();
+
+    function handleStepEnter(response) {
+      const stepNumber = response.element.dataset.step;
+      document.querySelectorAll(".chart").forEach(chart => {
+        chart.classList.remove("visible");
+        chart.classList.add("hidden");
+      });
+
+      const currentChart = document.querySelector(`.chart-step-${stepNumber}`);
+      if (currentChart) {
+        currentChart.classList.add("visible");
+        currentChart.classList.remove("hidden");
+      }
+    }
+
+    function init() {
+      scroller
+        .setup({ step: ".step", offset: 0.4, debug: false })
+        .onStepEnter(handleStepEnter);
+      window.addEventListener("resize", scroller.resize);
+    }
+
+    init();
+  </script>
+</body>
+</html>
